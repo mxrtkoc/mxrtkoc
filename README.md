@@ -1,4 +1,4 @@
-# 👋 Merhaba, ben [Ad Soyad]
+# 👋 Merhaba, ben Mert Koç
 
 Bilgisayar Teknolojisi öğrencisiyim. Yazılım geliştirme, gömülü sistemler ve web teknolojileriyle ilgileniyorum.  
 Projelerimi düzenli olarak GitHub üzerinden paylaşıyor, öğrendiklerimi uygulamalı olarak pekiştiriyorum.
