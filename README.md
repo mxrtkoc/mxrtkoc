@@ -17,7 +17,7 @@ Projelerimi düzenli olarak GitHub üzerinden paylaşıyor, öğrendiklerimi uyg
 
 ### 📂 Bazı Projelerim:
 - [📦 Stok Takip Sistemi (Visual Basic)](https://github.com/mxrtkoc/stok-takip)
-- [🌐 Kişisel Web Sayfası (HTML/CSS)](https://github.com/mxrtkoc/kisisel-site)
+- [🌐 Kişisel Web Sayfası (HTML/CSS)](https://mertkoc.netlify.app/)
 - [📶 Bluetooth Jammer (ESP32)](https://github.com/mxrtkoc/bluetooth-jammer)
 - [🎓 Eğitim Takip Uygulaması (Devam Ediyor)](https://github.com/mxrtkoc/egitim-takip)
 
