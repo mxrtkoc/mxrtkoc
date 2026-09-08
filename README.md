@@ -7,6 +7,8 @@
 </div>
 
 <img align="right" width="380" src="https://raw.githubusercontent.com/mxrtkoc/mxrtkoc/output/github-contribution-grid-snake-dark.svg" alt="snake animation" />
+<b>
+<b>
 
 ## 🧑‍💻 Hakkımda
 
