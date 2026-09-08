@@ -6,7 +6,7 @@
 
 </div>
 
-<img align="right" width="380" src="https://raw.githubusercontent.com/mertkoc/mertkoc/output/github-contribution-grid-snake-dark.svg" alt="snake animation" />
+<img align="right" width="380" src="https://raw.githubusercontent.com/mxrtkoc/mxrtkoc/output/github-contribution-grid-snake-dark.svg" alt="snake animation" />
 
 ## 🧑‍💻 Hakkımda
 
