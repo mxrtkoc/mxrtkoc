@@ -2,11 +2,11 @@ name: Generate Snake Animation
 
 on:
   schedule:
-    - cron: "0 0 * * *"    # her gün gece yarısı otomatik çalışır
-  workflow_dispatch: {}     # manuel olarak da tetiklenebilir
+    - cron: "0 0 * * *"
+  workflow_dispatch:
   push:
     branches:
-      - main                # ana branch'ine push yapınca da tetiklenir
+      - main
 
 permissions:
   contents: write
@@ -14,19 +14,581 @@ permissions:
 jobs:
   generate:
     runs-on: ubuntu-latest
-    steps:
-      - name: Generate snake animation
-        uses: Platane/snk@v3
-        with:
-          github_user_name: ${{ github.repository_owner }}
-          outputs: |
-            dist/github-contribution-grid-snake.svg
-            dist/github-contribution-grid-snake-dark.svg?palette=github-dark
 
-      - name: Push output to output branch
-        uses: crazy-max/ghaction-github-pages@v4
-        with:
-          target_branch: output
-          build_dir: dist
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Generate animated snake
+        shell: bash
+        run: |
+          python3 <<'PY'
+          import random
+          import html
+          from pathlib import Path
+
+          # ============================================================
+          # SETTINGS
+          # ============================================================
+
+          COLS = 52
+          ROWS = 7
+
+          CELL = 16
+          SIZE = 12
+          RADIUS = 3
+
+          WIDTH = COLS * CELL
+          HEIGHT = ROWS * CELL
+
+          # Number of food targets
+          FOOD_COUNT = 12
+
+          # Number of animation frames per movement
+          FRAMES_PER_STEP = 4
+
+          # Pause after eating
+          EAT_PAUSE_FRAMES = 5
+
+          # Randomize every GitHub Actions generation
+          random.seed()
+
+          # ============================================================
+          # COLORS
+          # ============================================================
+
+          LIGHT = {
+              "background": "#ffffff",
+              "cell": "#ebedf0",
+              "cell_border": "#d0d7de",
+              "snake_head": "#c084fc",
+              "snake": "#9333ea",
+              "snake_dark": "#6b21a8",
+              "food": "#22c55e",
+              "food_light": "#86efac",
+              "food_dark": "#15803d"
+          }
+
+          DARK = {
+              "background": "#0d1117",
+              "cell": "#161b22",
+              "cell_border": "#30363d",
+              "snake_head": "#d8b4fe",
+              "snake": "#a855f7",
+              "snake_dark": "#7e22ce",
+              "food": "#22c55e",
+              "food_light": "#86efac",
+              "food_dark": "#15803d"
+          }
+
+          # ============================================================
+          # HELPERS
+          # ============================================================
+
+          DIRECTIONS = [
+              (1, 0),
+              (-1, 0),
+              (0, 1),
+              (0, -1)
+          ]
+
+          def neighbors(pos):
+              x, y = pos
+              result = []
+
+              for dx, dy in DIRECTIONS:
+                  nx = x + dx
+                  ny = y + dy
+
+                  if 0 <= nx < COLS and 0 <= ny < ROWS:
+                      result.append((nx, ny))
+
+              return result
+
+
+          def choose_food(snake):
+              occupied = set(snake)
+
+              possible = [
+                  (x, y)
+                  for y in range(ROWS)
+                  for x in range(COLS)
+                  if (x, y) not in occupied
+              ]
+
+              return random.choice(possible)
+
+
+          def next_step(head, target, snake):
+              """
+              Choose a safe Manhattan step toward the food.
+              The snake is allowed to move into its current tail because
+              the tail will normally disappear on the next frame.
+              """
+
+              hx, hy = head
+              tx, ty = target
+
+              candidates = []
+
+              # Prefer directions that reduce Manhattan distance.
+              if tx > hx:
+                  candidates.append((1, 0))
+              elif tx < hx:
+                  candidates.append((-1, 0))
+
+              if ty > hy:
+                  candidates.append((0, 1))
+              elif ty < hy:
+                  candidates.append((0, -1))
+
+              # Add remaining directions as fallback.
+              remaining = [d for d in DIRECTIONS if d not in candidates]
+              random.shuffle(remaining)
+
+              candidates.extend(remaining)
+
+              tail = snake[-1]
+
+              for dx, dy in candidates:
+                  nx = hx + dx
+                  ny = hy + dy
+
+                  if not (0 <= nx < COLS and 0 <= ny < ROWS):
+                      continue
+
+                  # Allow moving into the tail.
+                  if (nx, ny) in snake and (nx, ny) != tail:
+                      continue
+
+                  return (nx, ny)
+
+              # If somehow surrounded, move randomly to any valid cell.
+              valid = neighbors(head)
+
+              if valid:
+                  return random.choice(valid)
+
+              return head
+
+
+          # ============================================================
+          # BUILD SNAKE SIMULATION
+          # ============================================================
+
+          # Start near the left side.
+          snake = [
+              (3, 3),
+              (2, 3),
+              (1, 3),
+          ]
+
+          food = choose_food(snake)
+
+          # Every frame stores the complete snake position.
+          states = []
+
+          # Food events:
+          # (spawn_frame, eat_frame, x, y)
+          food_events = []
+
+          current_frame = 0
+
+          # Initial state
+          states.append(list(snake))
+
+          for food_index in range(FOOD_COUNT):
+
+              # Make sure food does not spawn directly under the snake.
+              food = choose_food(snake)
+
+              spawn_frame = current_frame
+
+              # Move until the food is eaten.
+              safety_counter = 0
+
+              while snake[0] != food and safety_counter < 1000:
+                  safety_counter += 1
+
+                  head = snake[0]
+
+                  new_head = next_step(
+                      head,
+                      food,
+                      snake
+                  )
+
+                  snake.insert(0, new_head)
+
+                  # Eating food = keep the tail.
+                  if new_head == food:
+                      pass
+                  else:
+                      snake.pop()
+
+                  # Add several visual frames for smooth movement.
+                  for _ in range(FRAMES_PER_STEP):
+                      states.append(list(snake))
+                      current_frame += 1
+
+              eat_frame = current_frame
+
+              food_events.append(
+                  (
+                      spawn_frame,
+                      eat_frame,
+                      food[0],
+                      food[1]
+                  )
+              )
+
+              # Small pause after eating.
+              for _ in range(EAT_PAUSE_FRAMES):
+                  states.append(list(snake))
+                  current_frame += 1
+
+              # The next food is generated on the next iteration.
+
+          # Add a final pause.
+          for _ in range(15):
+              states.append(list(snake))
+              current_frame += 1
+
+          TOTAL_FRAMES = len(states)
+
+          # SVG animation duration.
+          DURATION = 26
+
+          # ============================================================
+          # SVG GENERATOR
+          # ============================================================
+
+          def frame_keytimes():
+              if TOTAL_FRAMES <= 1:
+                  return "0;1"
+
+              return ";".join(
+                  f"{i / (TOTAL_FRAMES - 1):.5f}"
+                  for i in range(TOTAL_FRAMES)
+              )
+
+
+          KEYTIMES = frame_keytimes()
+
+
+          def value_string(values):
+              return ";".join(str(v) for v in values)
+
+
+          def generate_svg(theme, filename):
+              colors = LIGHT if theme == "light" else DARK
+
+              svg = []
+
+              svg.append(
+                  f'<svg viewBox="-16 -32 {WIDTH + 32} {HEIGHT + 64}" '
+                  f'width="{WIDTH + 32}" '
+                  f'height="{HEIGHT + 64}" '
+                  f'xmlns="http://www.w3.org/2000/svg">'
+              )
+
+              svg.append(
+                  '<desc>'
+                  'Random animated purple snake for GitHub profile'
+                  '</desc>'
+              )
+
+              # --------------------------------------------------------
+              # Definitions
+              # --------------------------------------------------------
+
+              svg.append("<defs>")
+
+              # Food glow
+              svg.append(
+                  '<filter id="foodGlow" x="-100%" y="-100%" '
+                  'width="300%" height="300%">'
+                  '<feGaussianBlur stdDeviation="2.5" result="blur"/>'
+                  '<feMerge>'
+                  '<feMergeNode in="blur"/>'
+                  '<feMergeNode in="SourceGraphic"/>'
+                  '</feMerge>'
+                  '</filter>'
+              )
+
+              # Snake glow
+              svg.append(
+                  '<filter id="snakeGlow" x="-100%" y="-100%" '
+                  'width="300%" height="300%">'
+                  '<feGaussianBlur stdDeviation="1.2" result="blur"/>'
+                  '<feMerge>'
+                  '<feMergeNode in="blur"/>'
+                  '<feMergeNode in="SourceGraphic"/>'
+                  '</feMerge>'
+                  '</filter>'
+              )
+
+              svg.append("</defs>")
+
+              # --------------------------------------------------------
+              # Background
+              # --------------------------------------------------------
+
+              svg.append(
+                  f'<rect x="-16" y="-32" '
+                  f'width="{WIDTH + 32}" '
+                  f'height="{HEIGHT + 64}" '
+                  f'rx="10" '
+                  f'fill="{colors["background"]}"/>'
+              )
+
+              # --------------------------------------------------------
+              # GitHub-style grid
+              # --------------------------------------------------------
+
+              for y in range(ROWS):
+                  for x in range(COLS):
+
+                      px = x * CELL + 2
+                      py = y * CELL + 2
+
+                      svg.append(
+                          f'<rect '
+                          f'x="{px}" '
+                          f'y="{py}" '
+                          f'width="{SIZE}" '
+                          f'height="{SIZE}" '
+                          f'rx="{RADIUS}" '
+                          f'fill="{colors["cell"]}" '
+                          f'stroke="{colors["cell_border"]}" '
+                          f'stroke-width="0.5"/>'
+                      )
+
+              # --------------------------------------------------------
+              # FOOD
+              # --------------------------------------------------------
+
+              for index, (spawn, eat, fx, fy) in enumerate(food_events):
+
+                  px = fx * CELL + 2
+                  py = fy * CELL + 2
+
+                  values = []
+
+                  for frame in range(TOTAL_FRAMES):
+
+                      if spawn <= frame < eat:
+                          values.append("1")
+                      else:
+                          values.append("0")
+
+                  opacity_values = ";".join(values)
+
+                  # Glow
+                  svg.append(
+                      f'<rect '
+                      f'x="{px}" '
+                      f'y="{py}" '
+                      f'width="{SIZE}" '
+                      f'height="{SIZE}" '
+                      f'rx="3" '
+                      f'fill="{colors["food"]}" '
+                      f'opacity="0" '
+                      f'filter="url(#foodGlow)">'
+                      f'<animate '
+                      f'attributeName="opacity" '
+                      f'dur="{DURATION}s" '
+                      f'repeatCount="indefinite" '
+                      f'values="{opacity_values}" '
+                      f'keyTimes="{KEYTIMES}"/>'
+                      f'</rect>'
+                  )
+
+                  # Main food cube
+                  svg.append(
+                      f'<rect '
+                      f'x="{px}" '
+                      f'y="{py}" '
+                      f'width="{SIZE}" '
+                      f'height="{SIZE}" '
+                      f'rx="3" '
+                      f'fill="{colors["food"]}" '
+                      f'opacity="0">'
+                      f'<animate '
+                      f'attributeName="opacity" '
+                      f'dur="{DURATION}s" '
+                      f'repeatCount="indefinite" '
+                      f'values="{opacity_values}" '
+                      f'keyTimes="{KEYTIMES}"/>'
+                      f'</rect>'
+                  )
+
+              # --------------------------------------------------------
+              # SNAKE
+              # --------------------------------------------------------
+
+              # Maximum possible snake length.
+              max_length = max(len(state) for state in states)
+
+              for segment_index in range(max_length):
+
+                  x_values = []
+                  y_values = []
+                  opacity_values = []
+
+                  for state in states:
+
+                      if segment_index < len(state):
+
+                          sx, sy = state[segment_index]
+
+                          x_values.append(
+                              sx * CELL + 1
+                          )
+
+                          y_values.append(
+                              sy * CELL + 1
+                          )
+
+                          opacity_values.append("1")
+
+                      else:
+
+                          # Put unused segments outside the canvas.
+                          x_values.append("-50")
+                          y_values.append("-50")
+                          opacity_values.append("0")
+
+                  # Head is brighter and slightly larger.
+                  if segment_index == 0:
+
+                      fill = colors["snake_head"]
+                      size = 14
+                      offset = 0
+
+                      filter_value = ' filter="url(#snakeGlow)"'
+
+                  else:
+
+                      # Body gradually becomes darker toward the tail.
+                      if segment_index % 3 == 1:
+                          fill = colors["snake"]
+                      else:
+                          fill = colors["snake_dark"]
+
+                      size = 12
+                      offset = 2
+
+                      filter_value = ""
+
+                  x_string = value_string(x_values)
+                  y_string = value_string(y_values)
+                  opacity_string = ";".join(opacity_values)
+
+                  svg.append(
+                      f'<rect '
+                      f'x="{x_values[0]}" '
+                      f'y="{y_values[0]}" '
+                      f'width="{size}" '
+                      f'height="{size}" '
+                      f'rx="{4 if segment_index == 0 else 3}" '
+                      f'fill="{fill}"'
+                      f'{filter_value}>'
+                  )
+
+                  svg.append(
+                      f'<animate '
+                      f'attributeName="x" '
+                      f'dur="{DURATION}s" '
+                      f'repeatCount="indefinite" '
+                      f'values="{x_string}" '
+                      f'keyTimes="{KEYTIMES}" '
+                      f'calcMode="discrete"/>'
+                  )
+
+                  svg.append(
+                      f'<animate '
+                      f'attributeName="y" '
+                      f'dur="{DURATION}s" '
+                      f'repeatCount="indefinite" '
+                      f'values="{y_string}" '
+                      f'keyTimes="{KEYTIMES}" '
+                      f'calcMode="discrete"/>'
+                  )
+
+                  svg.append(
+                      f'<animate '
+                      f'attributeName="opacity" '
+                      f'dur="{DURATION}s" '
+                      f'repeatCount="indefinite" '
+                      f'values="{opacity_string}" '
+                      f'keyTimes="{KEYTIMES}" '
+                      f'calcMode="discrete"/>'
+                  )
+
+                  svg.append("</rect>")
+
+              # --------------------------------------------------------
+              # Finish
+              # --------------------------------------------------------
+
+              svg.append("</svg>")
+
+              Path(filename).write_text(
+                  "\n".join(svg),
+                  encoding="utf-8"
+              )
+
+
+          # ============================================================
+          # CREATE OUTPUT
+          # ============================================================
+
+          Path("dist").mkdir(exist_ok=True)
+
+          generate_svg(
+              "light",
+              "dist/github-contribution-grid-snake.svg"
+          )
+
+          generate_svg(
+              "dark",
+              "dist/github-contribution-grid-snake-dark.svg"
+          )
+
+          print("Snake animation generated successfully.")
+          print(f"Frames: {TOTAL_FRAMES}")
+          print(f"Food targets: {FOOD_COUNT}")
+          print(f"Maximum snake length: {max(len(s) for s in states)}")
+          PY
+
+      # --------------------------------------------------------------
+      # Publish to output branch
+      # --------------------------------------------------------------
+
+      - name: Publish animation
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git fetch origin output || true
+
+          if git show-ref --verify --quiet refs/remotes/origin/output; then
+            git checkout -B output origin/output
+          else
+            git checkout --orphan output
+            git rm -rf . || true
+          fi
+
+          mkdir -p .
+
+          cp dist/github-contribution-grid-snake.svg .
+          cp dist/github-contribution-grid-snake-dark.svg .
+
+          git add github-contribution-grid-snake.svg
+          git add github-contribution-grid-snake-dark.svg
+
+          git commit -m "Update random snake animation" || echo "No changes to commit"
+
+          git push origin output
