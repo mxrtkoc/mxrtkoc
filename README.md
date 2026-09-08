@@ -27,7 +27,7 @@
 
 ## 🚀 Öne Çıkan Projeler
 
-- **[My AI Daily Assistant]([https://github.com/mertkoc/my-ai-daily-assistant](https://github.com/mxrtkoc/React-AI-Project))** — React Native CLI + TypeScript ile geliştirilen, Hugging Face Inference API tabanlı duygu analizi yapan yapay zeka destekli günlük asistan uygulaması
+- **[My AI Daily Assistant](https://github.com/mxrtkoc/React-AI-Project)** — React Native CLI + TypeScript ile geliştirilen, Hugging Face Inference API tabanlı duygu analizi yapan yapay zeka destekli günlük asistan uygulaması
 - **[Kişisel Portföy Sitesi](https://mertkoc.netlify.app)** — React ile geliştirilen, Netlify üzerinde yayınlanan responsive portföy sitesi
 - **Eğitim Takip Uygulaması** — React hooks ve component tabanlı mimari ile geliştirilen öğrenci devam/yoklama takip uygulaması
 
