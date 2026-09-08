@@ -1,26 +1,39 @@
-# 👋 Merhaba, ben Mert Koç
+<div align="center">
 
-Bilgisayar Teknolojisi öğrencisiyim. Yazılım geliştirme, gömülü sistemler ve web teknolojileriyle ilgileniyorum.  
-Projelerimi düzenli olarak GitHub üzerinden paylaşıyor, öğrendiklerimi uygulamalı olarak pekiştiriyorum.
+# Merhaba, ben Mert Koç 👋
 
-### 🚀 İlgi Alanlarım
-- Web Geliştirme (HTML, CSS, temel PHP)
-- Masaüstü Uygulamaları (Visual Basic, Windows Forms)
-- Arduino & ESP32 ile Gömülü Sistem Projeleri
-- Eğitim alanına yönelik yazılım çözümleri
+**Software Developer** — React, React Native & TypeScript odaklı
 
-### 🛠️ Kullandığım Teknolojiler
-- 💻 Visual Basic, C, Java (temel)
-- 🌐 HTML, CSS, PHP (temel)
-- 🔌 Arduino, ESP32
-- 🗃️ Git, GitHub
+</div>
 
-### 📂 Bazı Projelerim:
-- [📦 Stok Takip Sistemi (Visual Basic)](https://github.com/mxrtkoc/stok-takip)
-- [🌐 Kişisel Web Sayfası (HTML/CSS)](https://mertkoc.netlify.app/)
-- [📶 Bluetooth Jammer (ESP32)](https://github.com/mxrtkoc/bluetooth-jammer)
-- [🎓 Eğitim Takip Uygulaması (Devam Ediyor)](https://github.com/mxrtkoc/egitim-takip)
+<img align="right" width="380" src="https://raw.githubusercontent.com/mertkoc/mertkoc/output/github-contribution-grid-snake-dark.svg" alt="snake animation" />
 
-> 💬 "Öğrenmeye ve üretmeye açık, gelişmeye istekli bir geliştiriciyim."
+## 🧑‍💻 Hakkımda
 
-📫 Bana ulaşın: [LinkedIn](https://www.linkedin.com/in/mert-ko%C3%A7-g/) • [Mail](52mert.koc@gmail.com)
+- 💼 Şu an **HASKURT LLC**'de uzaktan Yazılım Geliştirici olarak çalışıyorum — frontend/backend web geliştirme, Shopify e-ticaret çözümleri
+- 🎓 Karabük Üniversitesi Bilgisayar Teknolojisi mezunuyum; Anadolu Üniversitesi'nde Web Tasarımı ve Kodlama eğitimime devam ediyorum
+- 🌱 React Native + TypeScript ile mobil, React ile web uygulamaları geliştiriyorum
+- 🤖 Hugging Face Inference API entegrasyonuyla yapay zekâ destekli bir mobil uygulama geliştirip açık kaynak olarak yayınladım
+- 📫 Yeni fırsatlara ve işbirliklerine açığım
+
+<br clear="right"/>
+
+## 🛠️ Teknolojiler
+
+<p align="left">
+  <img src="https://skillicons.dev/icons?i=react,typescript,javascript,html,css,php,mysql,cs,python,git,arduino" alt="tech icons" />
+</p>
+
+## 🚀 Öne Çıkan Projeler
+
+- **[My AI Daily Assistant](https://github.com/mertkoc/my-ai-daily-assistant)** — React Native CLI + TypeScript ile geliştirilen, Hugging Face Inference API tabanlı duygu analizi yapan yapay zeka destekli günlük asistan uygulaması
+- **[Kişisel Portföy Sitesi](https://mertkoc.netlify.app)** — React ile geliştirilen, Netlify üzerinde yayınlanan responsive portföy sitesi
+- **Eğitim Takip Uygulaması** — React hooks ve component tabanlı mimari ile geliştirilen öğrenci devam/yoklama takip uygulaması
+
+## 📫 İletişim
+
+<p align="left">
+  <a href="https://linkedin.com/in/mert-koç-g"><img src="https://img.shields.io/badge/-LinkedIn-0077B5?style=flat-square&logo=linkedin&logoColor=white" /></a>
+  <a href="mailto:52mert.koc@gmail.com"><img src="https://img.shields.io/badge/-Email-D14836?style=flat-square&logo=gmail&logoColor=white" /></a>
+  <a href="https://mertkoc.netlify.app"><img src="https://img.shields.io/badge/-Website-000000?style=flat-square&logo=vercel&logoColor=white" /></a>
+</p>
